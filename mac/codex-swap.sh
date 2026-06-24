@@ -9,7 +9,7 @@ alias codex2='CODEX_HOME="$HOME/.codex2" codex'
 alias codex3='CODEX_HOME="$HOME/.codex3" codex'
 alias codex4='CODEX_HOME="$HOME/.codex4" codex'
 
-# ── helpers ──────────────────────────────────────────────
+# ── helpers -----------------------------------────────────
 
 _jwt_email() {
     local authfile="$1"
@@ -50,7 +50,7 @@ except:
 " 2>/dev/null
 }
 
-# ── codex-who ────────────────────────────────────────────
+# ── codex-who -----------------------------------──────────
 
 codex-who() {
     local a1="$HOME/.codex/auth.json"
@@ -67,7 +67,7 @@ codex-who() {
     echo "${email} · ${plan^^} · D-${days}"
 }
 
-# ── codex-pick ────────────────────────────────────────────
+# ── codex-pick -----------------------------------──────────
 
 codex-pick() {
     clear
@@ -76,9 +76,9 @@ codex-pick() {
     RED='\033[0;31m'; GRAY='\033[0;90m'; RESET='\033[0m'
 
     echo ""
-    echo -e "  ${CYAN}╔══════════════════════════════════╗${RESET}"
-    echo -e "  ${CYAN}║       Codex Account Switch       ║${RESET}"
-    echo -e "  ${CYAN}╚══════════════════════════════════╝${RESET}"
+    echo -e "  ${CYAN}+----------------------------------+${RESET}"
+    echo -e "  ${CYAN}|       Codex Account Switch       |${RESET}"
+    echo -e "  ${CYAN}+----------------------------------+${RESET}"
     echo ""
 
     local current="$HOME/.codex/auth.json"
@@ -140,7 +140,7 @@ codex-pick() {
     fi
 
     echo ""
-    echo -e "  ${GRAY}──────────────────────────────────${RESET}"
+    echo -e "  ${GRAY}-----------------------------------${RESET}"
     echo -e "  ${GRAY}Enter a number to switch the${RESET}"
     echo -e "  ${GRAY}Codex Desktop account.${RESET}"
     echo ""
@@ -161,7 +161,7 @@ codex-pick() {
     [ "$found" -eq 0 ] && { echo ""; echo -e "  ${RED}Invalid choice. Canceled.${RESET}"; echo ""; }
 }
 
-# ── codex-add ────────────────────────────────────────────
+# ── codex-add -----------------------------------──────────
 
 codex-add() {
     clear
@@ -170,9 +170,9 @@ codex-add() {
     RED='\033[0;31m'; GRAY='\033[0;90m'; RESET='\033[0m'
 
     echo ""
-    echo -e "  ${CYAN}╔══════════════════════════════════╗${RESET}"
-    echo -e "  ${CYAN}║       Codex Add Account          ║${RESET}"
-    echo -e "  ${CYAN}╚══════════════════════════════════╝${RESET}"
+    echo -e "  ${CYAN}+----------------------------------+${RESET}"
+    echo -e "  ${CYAN}|       Codex Add Account          |${RESET}"
+    echo -e "  ${CYAN}+----------------------------------+${RESET}"
     echo ""
 
     local found="" num=3
@@ -195,13 +195,13 @@ codex-add() {
     echo ""
     mkdir -p "$found"
 
-    echo -e "  ${GRAY}──────────────────────────────────${RESET}"
+    echo -e "  ${GRAY}-----------------------------------${RESET}"
     echo -e "  A browser will open."
     echo -e "  Login with your new account."
     echo ""
     echo -e "  ${GRAY}When Codex CLI appears,${RESET}"
     echo -e "  ${GRAY}type /exit or Ctrl+C to close it.${RESET}"
-    echo -e "  ${GRAY}──────────────────────────────────${RESET}"
+    echo -e "  ${GRAY}-----------------------------------${RESET}"
     echo ""
     printf "  Press Enter to continue..."
     read -r

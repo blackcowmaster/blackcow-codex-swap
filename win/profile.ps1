@@ -44,14 +44,12 @@ function _info-line($info) {
 function codex-pick {
     Clear-Host
     
-    # Header
     Write-Host ""
-    Write-Host "  ╔══════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "  ║       Codex Account Switch       ║" -ForegroundColor Cyan
-    Write-Host "  ╚══════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host "  +----------------------------------+" -ForegroundColor Cyan
+    Write-Host "  |       Codex Account Switch       |" -ForegroundColor Cyan
+    Write-Host "  +----------------------------------+" -ForegroundColor Cyan
     Write-Host ""
 
-    # Current account
     $current = "$HOME\.codex\auth.json"
     if (Test-Path $current) {
         $curInfo = _jwt-decode $current
@@ -66,7 +64,6 @@ function codex-pick {
         Write-Host ""
     }
 
-    # Account list
     $accounts = @()
     $folders = @("$HOME\.codex1", "$HOME\.codex2", "$HOME\.codex3", "$HOME\.codex4")
     $idx = 1
@@ -92,14 +89,13 @@ function codex-pick {
     if ($accounts.Count -eq 0) {
         Write-Host ""
         Write-Host "  No accounts found." -ForegroundColor Red
-        Write-Host "  Run codex2 to add an account, or codex-add." -ForegroundColor DarkGray
+        Write-Host "  Run codex-add to add one." -ForegroundColor DarkGray
         Write-Host ""
         return
     }
 
-    # Selection
     Write-Host ""
-    Write-Host "  ──────────────────────────────────" -ForegroundColor DarkGray
+    Write-Host "  ------------------------------------" -ForegroundColor DarkGray
     Write-Host "  Enter a number to switch the" -ForegroundColor DarkGray
     Write-Host "  Codex Desktop account." -ForegroundColor DarkGray
     Write-Host ""
@@ -123,12 +119,11 @@ function codex-pick {
 function codex-add {
     Clear-Host
     Write-Host ""
-    Write-Host "  ╔══════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "  ║       Codex Add Account          ║" -ForegroundColor Cyan
-    Write-Host "  ╚══════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host "  +----------------------------------+" -ForegroundColor Cyan
+    Write-Host "  |       Codex Add Account          |" -ForegroundColor Cyan
+    Write-Host "  +----------------------------------+" -ForegroundColor Cyan
     Write-Host ""
 
-    # Find free slot
     $slots = @("$HOME\.codex3", "$HOME\.codex4")
     $num = 3
     $found = $null
@@ -149,26 +144,22 @@ function codex-add {
 
     Write-Host "  Free slot: codex$num" -ForegroundColor Yellow
     Write-Host ""
-
-    # Create folder
     New-Item -ItemType Directory -Path $found -Force | Out-Null
 
-    Write-Host "  ──────────────────────────────────" -ForegroundColor DarkGray
+    Write-Host "  ------------------------------------" -ForegroundColor DarkGray
     Write-Host "  A browser will open." -ForegroundColor White
     Write-Host "  Login with your new account." -ForegroundColor White
     Write-Host ""
     Write-Host "  When Codex CLI appears," -ForegroundColor DarkGray
     Write-Host "  type /exit or Ctrl+C to close it." -ForegroundColor DarkGray
-    Write-Host "  ──────────────────────────────────" -ForegroundColor DarkGray
+    Write-Host "  ------------------------------------" -ForegroundColor DarkGray
     Write-Host ""
     Read-Host "  Press Enter to continue"
 
-    # Launch codex for login
     $env:CODEX_HOME = $found
     & codex
     $env:CODEX_HOME = $null
 
-    # Check login success
     if (-not (Test-Path (Join-Path $found "auth.json"))) {
         Write-Host ""
         Write-Host "  Login was not completed." -ForegroundColor Red
@@ -176,7 +167,6 @@ function codex-add {
         return
     }
 
-    # Try symlinks (may fail without admin; that's fine)
     Write-Host ""
     Write-Host "  Setting up session/skill sharing..." -ForegroundColor DarkGray
     $src = "$HOME\.codex"
@@ -215,7 +205,7 @@ function codex-who {
     $remain = ''
     if ($info.Until) {
         $days = [math]::Ceiling(($info.Until - (Get-Date)).TotalDays)
-        $remain = " · D-$days"
+        $remain = " - D-$days"
     }
-    Write-Host "$($info.Email) · $($info.Plan.ToUpper())$remain"
+    Write-Host "$($info.Email) | $($info.Plan.ToUpper()) | $remain"
 }

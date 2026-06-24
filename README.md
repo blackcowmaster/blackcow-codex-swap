@@ -1,76 +1,52 @@
 # blackcow-codex-swap
 
-⚡ Switch between multiple OpenAI Codex accounts — same sessions, skills, config. Separate quotas.
+Switch between multiple OpenAI Codex accounts.  
+Same sessions, skills, and config. Separate quotas.
 
-> 🪟 **Windows** (`win/profile.ps1`) · 🍎 **macOS/Linux** (`mac/codex-swap.sh`)  
-> [한국어 / Korean →](README_KR.md)
+> Windows: `win/profile.ps1` — macOS/Linux: `mac/codex-swap.sh`  
+> [한국어 / Korean](README_KR.md)
+
+---
+
+## Install
+
+**Windows:** Double-click `install.bat`, or run it from PowerShell.
+
+**macOS / Linux:** `bash install.sh`
+
+Then open a new terminal and run:
+
+```
+codex-pick
+```
+
+First-time setup: if you don't have a second account yet, run `codex-add`.
 
 ---
 
 ## Commands
 
-| Command | What it does |
+| Command | Description |
 |---------|-------------|
-| `codex-pick` | Interactive menu — pick an account for Desktop |
+| `codex-pick` | Interactive menu — switch the Desktop account |
 | `codex-add` | Add a new account (opens browser for login) |
-| `codex-who` | Show current account + plan + days left |
-| `codex2` ~ `codex4` | Launch CLI with a specific account |
-
-## Quick Install
-
-### Windows
-
-```powershell
-iwr -Uri "https://raw.githubusercontent.com/blackcowmaster/blackcow-codex-swap/main/win/profile.ps1" -OutFile "$HOME\.codex\profile.ps1"
-Add-Content -Path $PROFILE -Value ". `"`$HOME\.codex\profile.ps1`""
-. $PROFILE
-codex-pick
-```
-
-### macOS / Linux
-
-```bash
-source <(curl -s https://raw.githubusercontent.com/blackcowmaster/blackcow-codex-swap/main/mac/codex-swap.sh)
-codex-pick
-```
-
-To make it permanent, add the `source` line to your `~/.zshrc` or `~/.bashrc`.
-
----
-
-## Setup (first time)
-
-1. **Backup your current account:**
-   ```powershell
-   mkdir ~/.codex1
-   cp ~/.codex/auth.json ~/.codex1/auth.json
-   ```
-
-2. **Add a second account:**
-   ```powershell
-   codex-add     # Windows
-   # or create folder manually:
-   mkdir ~/.codex2
-   CODEX_HOME="$HOME/.codex2" codex   # login → creates auth.json
-   ```
-
-3. **Share sessions & skills (optional, Windows requires Admin):**
-   See `codex-add` which does this automatically.
+| `codex-who` | Show current account, plan, days remaining |
+| `codex2` .. `codex4` | Launch CLI with a specific account |
 
 ---
 
 ## How it works
 
 ```
-~/.codex/auth.json    ← active account (Desktop reads this)
-~/.codex1/auth.json   ← account #1 backup
-~/.codex2/auth.json   ← account #2 backup
-~/.codex3/auth.json   ← account #3
-~/.codex4/auth.json   ← account #4
+~/.codex/auth.json     <-- active account (Desktop reads this)
+~/.codex1/auth.json    <-- account #1 backup
+~/.codex2/auth.json    <-- account #2 backup
+~/.codex3/auth.json    <-- account #3
+~/.codex4/auth.json    <-- account #4
 ```
 
 `codex-pick` copies the chosen `auth.json` into `~/.codex/`.  
-Other files (sessions, skills) are symlinked — every account shares the same environment.
+Other files (sessions, skills) are symlinked so all accounts share the same environment.
 
 ---
 
@@ -79,9 +55,9 @@ Other files (sessions, skills) are symlinked — every account shares the same e
 ```
 PS> codex-pick
 
-  ╔══════════════════════════════════╗
-  ║       Codex Account Switch       ║
-  ╚══════════════════════════════════╝
+  +----------------------------------+
+  |       Codex Account Switch       |
+  +----------------------------------+
 
   Active: alice@company.com  (D-12)
 
@@ -99,8 +75,8 @@ PS> codex-pick
 
 ## Safety
 
-- **Do not run two instances at once** — SQLite can corrupt.
-- Swap *before* launching Desktop.
+Do not run two Codex instances at the same time — shared SQLite state can corrupt.  
+Switch accounts before launching Desktop.
 
 ## License
 
