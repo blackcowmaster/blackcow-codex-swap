@@ -74,7 +74,7 @@ Get-ChildItem -Path $src -Exclude auth.json | ForEach-Object {
 ### 3. Install the script
 
 ```powershell
-iwr -Uri "https://raw.githubusercontent.com/blackcowmaster/blackcow-codex-swap/main/profile.ps1" -OutFile "$HOME\.codex\profile.ps1"
+iwr -Uri "https://raw.githubusercontent.com/blackcowmaster/blackcow-codex-swap/main/win/profile.ps1" -OutFile "$HOME\.codex\profile.ps1"
 Add-Content -Path $PROFILE -Value ". `"`$HOME\.codex\profile.ps1`""
 ```
 
@@ -123,15 +123,22 @@ PS> codex-pick
 
 ## macOS / Linux
 
-This repo provides a **PowerShell script** designed for Windows.  
-The same concept works on macOS/Linux with bash:
+This repo provides a **PowerShell script** (`win/profile.ps1`) for Windows
+and a **bash script** (`mac/codex-swap.sh`) for macOS/Linux.
+
+For macOS/Linux, source the script in your shell:
 
 ```bash
 # In ~/.bashrc or ~/.zshrc
-alias codex='CODEX_HOME="$HOME/.codex" codex'
-alias codex2='CODEX_HOME="$HOME/.codex2" codex'
+source /path/to/blackcow-codex-swap/mac/codex-swap.sh
 
-# Symlink everything except auth.json
+# Or directly:
+source <(curl -s https://raw.githubusercontent.com/blackcowmaster/blackcow-codex-swap/main/mac/codex-swap.sh)
+```
+
+Then use `codex-pick`, `codex-add`, `codex-who` — same as Windows.
+
+Manual setup (without the script):
 cd ~/.codex2
 for f in $(ls ~/.codex | grep -v auth.json); do
     rm -rf "$f"
@@ -209,7 +216,7 @@ Get-ChildItem -Path $src -Exclude auth.json | ForEach-Object {
 
 **3. 스크립트 설치**
 ```powershell
-iwr -Uri "https://raw.githubusercontent.com/blackcowmaster/blackcow-codex-swap/main/profile.ps1" -OutFile "$HOME\.codex\profile.ps1"
+iwr -Uri "https://raw.githubusercontent.com/blackcowmaster/blackcow-codex-swap/main/win/profile.ps1" -OutFile "$HOME\.codex\profile.ps1"
 Add-Content -Path $PROFILE -Value ". `"`$HOME\.codex\profile.ps1`""
 . $PROFILE
 ```
