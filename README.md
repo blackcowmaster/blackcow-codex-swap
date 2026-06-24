@@ -2,6 +2,9 @@
 
 ⚡ Effortlessly switch between multiple OpenAI Codex accounts — same sessions, skills, and config. Separate quotas.
 
+> 🪟 **Windows only** · PowerShell 스크립트 기반  
+> *Mac/Linux users: the same concept works with bash — see [notes](#macoslinux)*
+
 > [한국어는 여기 / Korean here](#한국어)
 
 ---
@@ -118,6 +121,27 @@ PS> codex-pick
 - Swap accounts *before* launching Desktop, not while it's running.
 - Each `auth.json` belongs to a different ChatGPT account with its own quota.
 
+## macOS / Linux
+
+This repo provides a **PowerShell script** designed for Windows.  
+The same concept works on macOS/Linux with bash:
+
+```bash
+# In ~/.bashrc or ~/.zshrc
+alias codex='CODEX_HOME="$HOME/.codex" codex'
+alias codex2='CODEX_HOME="$HOME/.codex2" codex'
+
+# Symlink everything except auth.json
+cd ~/.codex2
+for f in $(ls ~/.codex | grep -v auth.json); do
+    rm -rf "$f"
+    ln -s "$HOME/.codex/$f" "$f"
+done
+```
+
+Then simply: `codex` for account A, `codex2` for account B, etc.  
+To swap the Desktop account, manually `cp ~/.codex2/auth.json ~/.codex/auth.json`.
+
 ## License
 
 MIT
@@ -201,6 +225,7 @@ codex-add     # 빈 슬롯 자동 감지 → 브라우저 열림
 - **절대 두 개를 동시에 실행하지 마세요** — SQLite 상태 파일이 깨집니다.
 - Desktop을 켜기 **전에** 계정을 전환하세요.
 - 각 `auth.json`은 서로 다른 ChatGPT 계정의 인증 정보입니다.
+- 🪟 이 스크립트는 **Windows + PowerShell** 기준입니다. Mac/Linux는 위의 [macOS/Linux](#macoslinux) 참고.
 
 ### 라이선스
 
