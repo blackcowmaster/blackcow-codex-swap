@@ -136,7 +136,6 @@ codex-pick() {
         echo ""
     fi
 
-    local accounts=() paths=() emails=()
     local idx=1
     for n in 1 2 3 4; do
         local f="$HOME/.codex${n}/auth.json"
@@ -172,11 +171,12 @@ codex-pick() {
         echo -e "  [${idx}] ${email}${marker}"
         echo -e "      $(_upper "$plan")${expire_color} / expires D-${days} (${datestr})${RESET}"
 
-        accounts+=("$idx"); paths+=("$f"); emails+=("$email")
-        ((idx++))
+        eval "path_${idx}=\$f"
+        eval "email_${idx}=\$email"
+        idx=$((idx + 1))
     done
 
-    if [ ${#accounts[@]} -eq 0 ]; then
+    if [ "$idx" -eq 1 ]; then
         echo ""
         echo -e "  ${RED}No accounts found.${RESET}"
         echo -e "  ${GRAY}Run codex2 to add an account, or codex-add.${RESET}"
@@ -189,21 +189,33 @@ codex-pick() {
     echo -e "  ${GRAY}Enter a number to switch the${RESET}"
     echo -e "  ${GRAY}Codex Desktop account.${RESET}"
     echo ""
-    printf "  Choice (1-%d): " ${#accounts[@]}
+    printf "  Choice (1-%d): " $((idx - 1))
     read -r choice
 
-    local found=0
-    for i in "${!accounts[@]}"; do
-        if [ "${accounts[$i]}" = "$choice" ]; then
-            cp "${paths[$i]}" "$current"
+    case "$choice" in
+        1|2|3|4) ;;
+        *)
             echo ""
-            echo -e "  ${GREEN}Switched -> ${emails[$i]}${RESET}"
+            echo -e "  ${RED}Invalid choice. Canceled.${RESET}"
             echo ""
-            found=1
-            break
-        fi
-    done
-    [ "$found" -eq 0 ] && { echo ""; echo -e "  ${RED}Invalid choice. Canceled.${RESET}"; echo ""; }
+            return 1
+            ;;
+    esac
+
+    local target_path="" target_email=""
+    eval "target_path=\${path_${choice}:-}"
+    eval "target_email=\${email_${choice}:-}"
+    if [ -z "$target_path" ]; then
+        echo ""
+        echo -e "  ${RED}Invalid choice. Canceled.${RESET}"
+        echo ""
+        return 1
+    fi
+
+    cp "$target_path" "$current"
+    echo ""
+    echo -e "  ${GREEN}Switched -> ${target_email}${RESET}"
+    echo ""
 }
 
 # ── codex-add -----------------------------------──────────
