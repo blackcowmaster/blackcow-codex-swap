@@ -5,9 +5,40 @@
 #   source /path/to/codex-swap.sh
 # https://github.com/blackcowmaster/blackcow-codex-swap
 
-alias codex2='CODEX_HOME="$HOME/.codex2" codex'
-alias codex3='CODEX_HOME="$HOME/.codex3" codex'
-alias codex4='CODEX_HOME="$HOME/.codex4" codex'
+_codex_cli() {
+    local external_codex
+
+    if [ -n "${CODEX_CLI_PATH:-}" ] && [ -x "$CODEX_CLI_PATH" ]; then
+        "$CODEX_CLI_PATH" "$@"
+        return
+    fi
+
+    if [ "$(uname -s 2>/dev/null)" = "Darwin" ] && [ -x "/Applications/Codex.app/Contents/Resources/codex" ]; then
+        "/Applications/Codex.app/Contents/Resources/codex" "$@"
+        return
+    fi
+
+    if [ -n "${BASH_VERSION:-}" ]; then
+        external_codex=$(type -P codex 2>/dev/null || true)
+    elif [ -n "${ZSH_VERSION:-}" ]; then
+        external_codex=$(whence -p codex 2>/dev/null || true)
+    else
+        external_codex=$(command -v codex 2>/dev/null || true)
+    fi
+
+    if [ -n "$external_codex" ] && [ -x "$external_codex" ]; then
+        "$external_codex" "$@"
+        return
+    fi
+
+    echo "codex CLI not found. Install Codex or set CODEX_CLI_PATH." >&2
+    return 127
+}
+
+codex() { CODEX_HOME="${CODEX_HOME:-$HOME/.codex}" _codex_cli "$@"; }
+codex2() { CODEX_HOME="$HOME/.codex2" _codex_cli "$@"; }
+codex3() { CODEX_HOME="$HOME/.codex3" _codex_cli "$@"; }
+codex4() { CODEX_HOME="$HOME/.codex4" _codex_cli "$@"; }
 
 # ── helpers -----------------------------------────────────
 
@@ -42,12 +73,19 @@ try:
     dec = base64.urlsafe_b64decode(body).decode()
     obj = json.loads(dec)
     auth = obj.get('https://api.openai.com/auth', {})
-    print(auth.get('chatgpt_plan_type', '?'))
-    print(auth.get('chatgpt_subscription_active_until', ''))
+    print(str(auth.get('chatgpt_plan_type', '?')) + '\t' + str(auth.get('chatgpt_subscription_active_until', '')))
 except:
-    print('?')
-    print('')
+    print('?\t')
 " 2>/dev/null
+}
+
+_upper() {
+    printf "%s" "$1" | tr '[:lower:]' '[:upper:]'
+}
+
+_auth_hash() {
+    [ -f "$1" ] || return 1
+    shasum -a 256 "$1" 2>/dev/null | cut -d' ' -f1
 }
 
 # ── codex-who -----------------------------------──────────
@@ -64,7 +102,7 @@ codex-who() {
         now=$(date +%s)
         days=$(( (ts - now) / 86400 + 1 ))
     fi
-    echo "${email} · ${plan^^} · D-${days}"
+    echo "${email} · $(_upper "$plan") · D-${days}"
 }
 
 # ── codex-pick -----------------------------------──────────
@@ -82,6 +120,8 @@ codex-pick() {
     echo ""
 
     local current="$HOME/.codex/auth.json"
+    local current_hash=""
+    [ -f "$current" ] && current_hash=$(_auth_hash "$current")
     if [ -f "$current" ]; then
         local cemail cplan cuntil cdays
         cemail=$(_jwt_email "$current")
@@ -101,6 +141,11 @@ codex-pick() {
     for n in 1 2 3 4; do
         local f="$HOME/.codex${n}/auth.json"
         [ -f "$f" ] || continue
+        local slot_hash
+        slot_hash=$(_auth_hash "$f")
+        if [ -n "$current_hash" ] && [ "$slot_hash" = "$current_hash" ]; then
+            continue
+        fi
         local email plan until days
         email=$(_jwt_email "$f")
         read -r plan until < <(_jwt_plan "$f")
@@ -114,7 +159,7 @@ codex-pick() {
         [ -n "$until" ] && datestr=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${until:0:19}" "+%m/%d" 2>/dev/null || date -d "${until:0:19}" "+%m/%d" 2>/dev/null)
 
         local marker=""
-        if [ "$(shasum -a 256 "$f" 2>/dev/null | cut -d' ' -f1)" = "$(shasum -a 256 "$current" 2>/dev/null | cut -d' ' -f1)" ]; then
+        if [ -n "$current_hash" ] && [ "$slot_hash" = "$current_hash" ]; then
             marker="  ${GREEN}<-- active${RESET}"
         fi
 
@@ -125,7 +170,7 @@ codex-pick() {
         }
 
         echo -e "  [${idx}] ${email}${marker}"
-        echo -e "      ${plan^^}${expire_color} / expires D-${days} (${datestr})${RESET}"
+        echo -e "      $(_upper "$plan")${expire_color} / expires D-${days} (${datestr})${RESET}"
 
         accounts+=("$idx"); paths+=("$f"); emails+=("$email")
         ((idx++))
@@ -175,8 +220,8 @@ codex-add() {
     echo -e "  ${CYAN}+----------------------------------+${RESET}"
     echo ""
 
-    local found="" num=3
-    for n in 3 4; do
+    local found="" num=2
+    for n in 2 3 4; do
         if [ ! -f "$HOME/.codex${n}/auth.json" ]; then
             found="$HOME/.codex${n}"
             num=$n
@@ -206,19 +251,22 @@ codex-add() {
     printf "  Press Enter to continue..."
     read -r
 
-    CODEX_HOME="$found" codex
+    CODEX_HOME="$found" _codex_cli
+    local codex_status=$?
 
     if [ ! -f "$found/auth.json" ]; then
         echo ""
         echo -e "  ${RED}Login was not completed.${RESET}"
+        [ "$codex_status" -ne 0 ] && echo -e "  ${GRAY}Codex CLI exited with status ${codex_status}.${RESET}"
         echo ""
-        return
+        return "$codex_status"
     fi
 
     echo ""
     echo -e "  ${GRAY}Setting up session/skill sharing...${RESET}"
     local src="$HOME/.codex" linked=0 failed=0
     for item in "$src"/*; do
+        [ -e "$item" ] || continue
         local name
         name=$(basename "$item")
         [ "$name" = "auth.json" ] && continue
@@ -235,4 +283,37 @@ codex-add() {
     echo ""
     echo -e "  ${CYAN}Use codex-pick to switch!${RESET}"
     echo ""
+}
+
+codex-clear() {
+    local slot="$1"
+    case "$slot" in
+        1|2|3|4) ;;
+        *)
+            echo "Usage: codex-clear <1|2|3|4>"
+            return 2
+            ;;
+    esac
+
+    local authfile="$HOME/.codex${slot}/auth.json"
+    if [ ! -f "$authfile" ]; then
+        echo "codex${slot} is already empty."
+        return 0
+    fi
+
+    local email
+    email=$(_jwt_email "$authfile")
+    printf "Clear codex%s (%s)? This removes only %s [y/N]: " "$slot" "$email" "$authfile"
+    local answer
+    read -r answer
+    case "$answer" in
+        y|Y|yes|YES)
+            rm -f "$authfile"
+            echo "Cleared codex${slot}."
+            ;;
+        *)
+            echo "Canceled."
+            return 1
+            ;;
+    esac
 }

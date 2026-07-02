@@ -28,8 +28,10 @@ codex-pick
 
 | 명령어 | 설명 |
 |--------|------|
+| `codex` | 현재 활성 계정으로 CLI 실행 |
 | `codex-pick` | 계정 목록을 보고 숫자로 Desktop 전환 |
 | `codex-add` | 새 계정 추가 (브라우저 열림) |
+| `codex-clear <슬롯>` | 저장된 계정 슬롯 비우기. 예: `codex-clear 2` |
 | `codex-who` | 현재 계정, 요금제, 남은 일수 확인 |
 | `codex2` .. `codex4` | CLI를 특정 계정으로 실행 |
 
@@ -39,7 +41,6 @@ codex-pick
 
 ```
 ~/.codex/auth.json     <-- Desktop이 읽는 활성 계정
-~/.codex1/auth.json    <-- 계정 #1 보관
 ~/.codex2/auth.json    <-- 계정 #2 보관
 ~/.codex3/auth.json    <-- 계정 #3
 ~/.codex4/auth.json    <-- 계정 #4
@@ -47,6 +48,10 @@ codex-pick
 
 `codex-pick`이 선택한 `auth.json`을 `~/.codex/`로 복사합니다.  
 나머지 파일은 심링크로 연결되어 모든 계정이 환경을 공유합니다.
+
+macOS에서는 셸 헬퍼가 전역 `codex`보다
+`/Applications/Codex.app/Contents/Resources/codex`에 들어 있는 Codex Desktop
+번들 CLI를 먼저 사용합니다. 오래된 npm 설치본 때문에 실행이 죽는 경우를 피하기 위한 동작입니다.
 
 ---
 
