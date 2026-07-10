@@ -13,9 +13,15 @@ _codex_cli() {
         return
     fi
 
-    if [ "$(uname -s 2>/dev/null)" = "Darwin" ] && [ -x "/Applications/Codex.app/Contents/Resources/codex" ]; then
-        "/Applications/Codex.app/Contents/Resources/codex" "$@"
-        return
+    if [ "$(uname -s 2>/dev/null)" = "Darwin" ]; then
+        for _codex_candidate in \
+            "/Applications/Codex.app/Contents/Resources/codex" \
+            "/Applications/ChatGPT.app/Contents/Resources/codex"; do
+            if [ -x "$_codex_candidate" ]; then
+                "$_codex_candidate" "$@"
+                return
+            fi
+        done
     fi
 
     if [ -n "${BASH_VERSION:-}" ]; then
